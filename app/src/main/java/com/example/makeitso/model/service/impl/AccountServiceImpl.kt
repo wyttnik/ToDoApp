@@ -32,8 +32,12 @@ import com.google.firebase.auth.ktx.userProfileChangeRequest
 import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.onClosed
+import kotlinx.coroutines.channels.onFailure
+import kotlinx.coroutines.channels.onSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlin.math.log
 
@@ -53,9 +57,9 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
             if (it.isAnonymous) User(id = it.uid, isAnonymous = it.isAnonymous)
             else User(id = it.uid,
               isAnonymous = it.isAnonymous,
-              username = it.providerData[1].displayName ?: "",
-              email = it.providerData[1].email ?: "",
-              picUrl = it.providerData[1].photoUrl,
+              username = it.displayName ?: "",
+              email = it.email ?: "",
+              picUrl = it.photoUrl,
               providerInfo = it.providerData[1].providerId)
           } ?: User())
         }
@@ -101,17 +105,13 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
   }
 
   override suspend fun signInGoogle(intent: Intent,oneTapClient: SignInClient):Boolean {
-    Log.d("test-signInGoogle1", "asdad")
     try{
       val credential = oneTapClient.getSignInCredentialFromIntent(intent)
-      Log.d("test-signInGoogle2", "asdad")
       val googleCredentials = GoogleAuthProvider.getCredential(credential.googleIdToken, null)
-      Log.d("test-signInGoogle3", "asdad")
       try {
         auth.signInWithCredential(googleCredentials).await()
       } catch(e: Exception) {
         e.printStackTrace()
-        Log.d("fsf", "$e")
         if(e is CancellationException) throw e
       }
       return true
@@ -120,36 +120,36 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
   }
 
   override suspend fun changeProfile(newInfo: EditUiState) {
-    Log.d("test","${newInfo.username} ${newInfo.email} ${newInfo.picUrl}")
     val profileUpdates = userProfileChangeRequest {
       displayName = newInfo.username
       photoUri = Uri.parse(newInfo.picUrl)
-      Log.d("test1","$displayName $photoUri")
     }
-    auth.currentUser!!.updateProfile(profileUpdates)
-    auth.currentUser!!.updateEmail(newInfo.email)
+    auth.currentUser!!.updateProfile(profileUpdates).await()
+    auth.currentUser!!.updateEmail(newInfo.email).await()
   }
 
-  override suspend fun getUserInfo() {
-    Log.d("tttestst", "$auth")
+  override fun getUserInfo(): EditUiState {
+    lateinit var name: String
+    lateinit var email: String
+    lateinit var photoUrl: String
     auth.currentUser?.let{
-//      for (profile in it.providerData) {
-      val profile: UserInfo = if (it.providerData.size > 1) it.providerData[1]
-      else it.providerData[0]
-      // Id of the provider (ex: google.com)
-      val providerId = profile.providerId
+      for (profile in it.providerData) {
+        val providerId = profile.providerId
+        val uid = profile.uid
+        val name = profile.displayName
+        val email = profile.email
+        val photoUrl = profile.photoUrl
+        Log.d("getUserInfoAll", "providerId: $providerId uid: $uid name: $name" +
+                " email: $email photoUrl: $photoUrl")
+      }
+      val providerId = if (it.providerData.size > 1) it.providerData[1].providerId
+      else it.providerData[0].providerId
 
-      // UID specific to the provider
-      val uid = profile.uid
-
-      // Name, email address, and profile photo Url
-      val name = profile.displayName
-      val email = profile.email
-      val photoUrl = profile.photoUrl
-      Log.d("Info", "provider: ${providerId}\n name: ${name}\n email: " +
-              "$email\n photoUrl: $photoUrl\n userId: $uid")
-//      }
+      name = it.displayName ?: ""
+      email = it.email ?: ""
+      photoUrl = (it.photoUrl ?: "").toString()
     }
+    return EditUiState(username = name, email = email, picUrl = photoUrl)
   }
 
   companion object {

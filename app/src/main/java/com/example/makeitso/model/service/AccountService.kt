@@ -36,5 +36,5 @@ interface AccountService {
   suspend fun signOut()
   suspend fun signInGoogle(intent: Intent,oneTapClient: SignInClient):Boolean
   suspend fun changeProfile(newInfo: EditUiState)
-  suspend fun getUserInfo()
+  fun getUserInfo(): EditUiState
 }

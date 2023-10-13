@@ -123,17 +123,18 @@ class MakeItSoActivity : AppCompatActivity() {
               composable(SETTINGS_SCREEN) {
                 SettingsScreen(
                   restartApp = { route -> appState.clearAndNavigate(route) },
-                  openScreen = { route -> appState.navigate(route) }
+                  openScreen = { route -> appState.navigate(route) },
+                  openAndPopUp = {route, popUp -> appState.navigateAndPopUp(route, popUp)}
                 )
               }
 
               composable(LOGIN_SCREEN) {
-                LoginScreen(openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) },
+                LoginScreen(restartApp = { route -> appState.clearAndNavigate(route) },
                   oneTapClient = oneTapClient, signInRequest = signInRequest)
               }
 
               composable(SIGN_UP_SCREEN) {
-                SignUpScreen(openAndPopUp = { route, popUp -> appState.navigateAndPopUp(route, popUp) })
+                SignUpScreen(restartApp = { route -> appState.clearAndNavigate(route) })
               }
 
               composable(TASKS_SCREEN) { TasksScreen(openScreen = { route -> appState.navigate(route) }) }

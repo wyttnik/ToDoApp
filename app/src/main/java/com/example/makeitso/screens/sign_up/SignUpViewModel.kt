@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.SETTINGS_SCREEN
 import com.example.makeitso.SIGN_UP_SCREEN
+import com.example.makeitso.SPLASH_SCREEN
 import com.example.makeitso.common.ext.isValidEmail
 import com.example.makeitso.common.ext.isValidPassword
 import com.example.makeitso.common.ext.passwordMatches
@@ -56,7 +57,7 @@ class SignUpViewModel @Inject constructor(
     uiState.value = uiState.value.copy(repeatPassword = newValue)
   }
 
-  fun onSignUpClick(openAndPopUp: (String, String) -> Unit) {
+  fun onSignUpClick(restartApp: (String) -> Unit) {
     if (!email.isValidEmail()) {
       SnackbarManager.showMessage(AppText.email_error)
       return
@@ -75,7 +76,7 @@ class SignUpViewModel @Inject constructor(
     launchCatching {
       //TODO
       accountService.linkAccount(email,password)
-      openAndPopUp(SETTINGS_SCREEN, SIGN_UP_SCREEN)
+      restartApp(SPLASH_SCREEN)
     }
   }
 }

@@ -28,6 +28,7 @@ import androidx.core.app.ActivityCompat.startIntentSenderForResult
 import com.example.makeitso.LOGIN_SCREEN
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.SETTINGS_SCREEN
+import com.example.makeitso.SPLASH_SCREEN
 import com.example.makeitso.common.ext.isValidEmail
 import com.example.makeitso.common.snackbar.SnackbarManager
 import com.example.makeitso.model.service.AccountService
@@ -59,15 +60,14 @@ class LoginViewModel @Inject constructor(
     uiState.value = uiState.value.copy(password = newValue)
   }
 
-  fun googleSignIn(intent: Intent, oneTapClient: SignInClient,openAndPopUp: (String, String) -> Unit){
-    Log.d("test-googleSignIn", "adasd")
+  fun googleSignIn(intent: Intent, oneTapClient: SignInClient,restartApp: (String) -> Unit){
     launchCatching {
       val result = accountService.signInGoogle(intent, oneTapClient)
-      if(result) openAndPopUp(SETTINGS_SCREEN, LOGIN_SCREEN)
+      if(result) restartApp(SPLASH_SCREEN)
     }
   }
 
-  fun onSignInClick(openAndPopUp: (String, String) -> Unit) {
+  fun onSignInClick(restartApp: (String) -> Unit) {
     if (!email.isValidEmail()) {
       SnackbarManager.showMessage(AppText.email_error)
       return
@@ -80,7 +80,7 @@ class LoginViewModel @Inject constructor(
 
     launchCatching {
       accountService.authenticate(email, password)
-      openAndPopUp(SETTINGS_SCREEN, LOGIN_SCREEN)
+      restartApp(SPLASH_SCREEN)
     }
   }
 

@@ -43,15 +43,18 @@ import com.example.makeitso.common.ext.card
 import com.example.makeitso.common.ext.fieldModifier
 import com.example.makeitso.common.ext.spacer
 import com.example.makeitso.common.ext.textButton
+import okhttp3.internal.notify
 
 @ExperimentalMaterialApi
 @Composable
 fun SettingsScreen(
   restartApp: (String) -> Unit,
   openScreen: (String) -> Unit,
+  openAndPopUp: (String, String) -> Unit,
   modifier: Modifier = Modifier,
   viewModel: SettingsViewModel = hiltViewModel()
 ) {
+
   val uiState by viewModel.uiState.collectAsState(
     initial = SettingsUiState(false)
   )
@@ -81,7 +84,6 @@ fun SettingsScreen(
     }
     else{
       if (!editUi.isEditable){
-        Log.d("afaf", "${uiState.username} ${uiState.email} ${uiState.picUrl}")
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
           TopAppBar(
             title = { Text("Profile") },
@@ -128,7 +130,7 @@ fun SettingsScreen(
             readOnly = true,
             leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = "Email") }
           )
-          //      EmailField(uiState.email, viewModel::onEmailChange, Modifier.fieldModifier())
+
           OutlinedTextField(
             value = uiState.providerInfo,
             singleLine = true,
@@ -197,7 +199,7 @@ fun SettingsScreen(
             {viewModel.onUsernameChange(uiState.username)},
             {viewModel.onEmailChange(uiState.email)},
             {viewModel.onPicUriChange(uiState.picUrl.toString())})
-          ConfirmEditCard { viewModel.confirmChanges(openScreen) }
+          ConfirmEditCard { viewModel.confirmChanges(openAndPopUp) }
         }
       }
     }

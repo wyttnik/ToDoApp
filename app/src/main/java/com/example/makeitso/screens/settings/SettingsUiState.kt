@@ -30,5 +30,8 @@ data class EditUiState(
     val isEditable: Boolean = false,
     val username: String = "",
     val email: String = "",
-    val picUrl: String = ""
+    val picUrl: String = "",
+    val usernameInitCheck: Boolean = true,
+    val emailInitCheck: Boolean = true,
+    val picUrlInitCheck: Boolean = true
 )

@@ -33,6 +33,8 @@ import com.example.makeitso.screens.MakeItSoViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
+import okhttp3.internal.notify
+import okhttp3.internal.wait
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -50,7 +52,7 @@ class SettingsViewModel @Inject constructor(
     )
   }
 
-  var editUiState = mutableStateOf(EditUiState())
+  var editUiState = mutableStateOf(accountService.getUserInfo())
     private set
 
   private val email
@@ -94,7 +96,7 @@ class SettingsViewModel @Inject constructor(
     }
   }
 
-  fun confirmChanges(openScreen: (String) -> Unit) {
+  fun confirmChanges(openScreen: (String,String) -> Unit) {
     if (!email.isValidEmail()) {
       SnackbarManager.showMessage(R.string.email_error)
       return
@@ -103,13 +105,8 @@ class SettingsViewModel @Inject constructor(
     launchCatching {
       accountService.changeProfile(EditUiState(username = username, email = email, picUrl = picUri))
       editUiState.value = editUiState.value.copy(isEditable = false)
-      openScreen(SETTINGS_SCREEN)
-    }
-  }
-
-  fun onGetUserInfoClick() {
-    launchCatching {
       accountService.getUserInfo()
+      openScreen(SETTINGS_SCREEN,SETTINGS_SCREEN)
     }
   }
 

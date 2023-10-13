@@ -30,7 +30,7 @@ import com.example.makeitso.common.ext.fieldModifier
 
 @Composable
 fun SignUpScreen(
-  openAndPopUp: (String, String) -> Unit,
+  restartApp: (String) -> Unit,
   modifier: Modifier = Modifier,
   viewModel: SignUpViewModel = hiltViewModel()
 ) {
@@ -49,7 +49,7 @@ fun SignUpScreen(
     RepeatPasswordField(uiState.repeatPassword, viewModel::onRepeatPasswordChange, fieldModifier)
 
     BasicButton(AppText.create_account, Modifier.basicButton()) {
-      viewModel.onSignUpClick(openAndPopUp)
+      viewModel.onSignUpClick(restartApp)
     }
   }
 }

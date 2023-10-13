@@ -47,7 +47,7 @@ import androidx.lifecycle.lifecycleScope
 
 @Composable
 fun LoginScreen(
-  openAndPopUp: (String, String) -> Unit,
+  restartApp: (String) -> Unit,
   oneTapClient: SignInClient,
   signInRequest: BeginSignInRequest,
   modifier: Modifier = Modifier,
@@ -67,14 +67,13 @@ fun LoginScreen(
     EmailField(uiState.email, viewModel::onEmailChange, Modifier.fieldModifier())
     PasswordField(uiState.password, viewModel::onPasswordChange, Modifier.fieldModifier())
 
-    BasicButton(AppText.sign_in, Modifier.basicButton()) { viewModel.onSignInClick(openAndPopUp) }
+    BasicButton(AppText.sign_in, Modifier.basicButton()) { viewModel.onSignInClick(restartApp) }
 
     val launcher = rememberLauncherForActivityResult(
       contract = ActivityResultContracts.StartIntentSenderForResult()){
 
       coroutineScope.launch {
-        Log.d("test", "ddd")
-        viewModel.googleSignIn(it.data ?: return@launch, oneTapClient, openAndPopUp)
+        viewModel.googleSignIn(it.data ?: return@launch, oneTapClient, restartApp)
       }
     }
 
@@ -90,7 +89,6 @@ fun LoginScreen(
           // do nothing and continue presenting the signed-out UI.
           Log.d("failure", e.localizedMessage)
         }
-      //viewModel.onSignInWithGoogleClick(openAndPopUp,oneTapClient,signInRequest)
     }
 
     BasicTextButton(AppText.forgot_password, Modifier.textButton()) {
